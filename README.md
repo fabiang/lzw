@@ -1,6 +1,6 @@
 # fabiang/lzw [![Build Status](https://travis-ci.org/fabiang/lzw.png)](https://travis-ci.org/fabiang/lzw)
 
-LZW compression library.
+Compression library for Lempel–Ziv–Welch (LZW). Read more [about LZW on Wikipedia](http://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch)
 
 ## SYSTEM REQUIREMENTS
 
