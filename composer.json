@@ -1,0 +1,41 @@
+{
+    "name": "fabiang/lzw",
+    "description": "LZW compression library",
+    "license": "BSD-2-Clause",
+    "homepage": "https://github.com/fabiang/lzw",
+    "keywords": ["lzw", "compression"],
+    "authors": [
+        {
+            "name": "Fabian Grutschus",
+            "email": "f.grutschus@lubyte.de",
+            "homepage": "http://www.lubyte.de/",
+            "role": "developer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {"psr-0": {"Fabiang\\LZW\\": "src/"}},
+    "require": {
+        "php": ">=5.3",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {},
+    "config": {
+        "bin-dir": "bin/"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
+    "archive": {
+        "exclude": [
+            ".gitignore",
+            ".gitattributes",
+            ".scrutinizer.yml",
+            ".travis.yml",
+            "/tests",
+            "/docs",
+            "/bin"
+        ]
+    }
+}
