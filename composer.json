@@ -1,6 +1,6 @@
 {
     "name": "fabiang/lzw",
-    "description": "LZW compression library",
+    "description": "Compression library for Lempel–Ziv–Welch (LZW) for PHP",
     "license": "BSD-2-Clause",
     "homepage": "https://github.com/fabiang/lzw",
     "keywords": ["lzw", "compression"],
