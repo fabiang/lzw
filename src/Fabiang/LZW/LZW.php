@@ -56,7 +56,7 @@ class LZW
         mb_internal_encoding('UTF-8');
 
         $dict   = array();
-        $data   = static::md_split($s);
+        $data   = self::split($s);
         $out    = array();
         $phrase = $data[0];
         $code   = 256;
@@ -70,7 +70,7 @@ class LZW
                 if (mb_strlen($phrase) > 1) {
                     $add = $dict[$phrase];
                 } else {
-                    $add = static::mb_ord(mb_substr($phrase, 0, 1));
+                    $add = self::ord(mb_substr($phrase, 0, 1));
                 }
                 $out[]                     = $add;
                 $dict[$phrase . $currChar] = $code;
@@ -79,10 +79,10 @@ class LZW
             }
         }
 
-        $out[] = mb_strlen($phrase) > 1 ? $dict[$phrase] : static::mb_ord(mb_substr($phrase, 0, 1));
+        $out[] = mb_strlen($phrase) > 1 ? $dict[$phrase] : self::ord(mb_substr($phrase, 0, 1));
 
         for ($i = 0, $c = count($out); $i < $c; $i++) {
-            $out[$i] = static::mb_chr($out[$i]);
+            $out[$i] = self::chr($out[$i]);
         }
 
         mb_internal_encoding($encoding);
@@ -104,7 +104,6 @@ class LZW
         $oldPhrase = $currChar;
         $out       = array($currChar);
         $code      = 256;
-        $phrase    = '';
         $length    = mb_strlen($s);
 
         for ($i = 1; $i < $length; $i++) {
@@ -135,7 +134,7 @@ class LZW
      * @param string $s
      * @return array
      */
-    private static function md_split($s)
+    private static function split($s)
     {
         $strlen = mb_strlen($s);
         $array  = array();
@@ -153,7 +152,7 @@ class LZW
      * @param string $u
      * @return integer
      */
-    private static function mb_ord($u)
+    private static function ord($u)
     {
         $k  = mb_convert_encoding($u, 'UCS-2LE', 'UTF-8');
         $k1 = ord(substr($k, 0, 1));
@@ -167,7 +166,7 @@ class LZW
      * @param integer $int
      * @return string
      */
-    private static function mb_chr($int)
+    private static function chr($int)
     {
         return mb_convert_encoding(pack('n', $int), 'UTF-8', 'UTF-16BE');
     }

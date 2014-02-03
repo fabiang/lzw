@@ -46,6 +46,9 @@ class LZWTest extends \PHPUnit_Framework_TestCase
      * Test compression.
      *
      * @covers Fabiang\LZW\LZW::compress
+     * @covers Fabiang\LZW\LZW::split
+     * @covers Fabiang\LZW\LZW::ord
+     * @covers Fabiang\LZW\LZW::chr
      * @dataProvider provideCompressionString
      * @return void
      */
