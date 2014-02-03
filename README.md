@@ -1,4 +1,4 @@
-# fabiang/lzw
+# fabiang/lzw [![Build Status](https://travis-ci.org/fabiang/lzw.png)](https://travis-ci.org/fabiang/lzw)
 
 LZW compression library.
 
