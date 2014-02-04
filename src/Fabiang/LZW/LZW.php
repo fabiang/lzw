@@ -53,6 +53,7 @@ class LZW
     private $dataString;
     private $dataVal;
     private $enlargeIn;
+    private $index;
 
     /**
      * Compress string with LZW.
@@ -67,12 +68,19 @@ class LZW
             return '';
         }
 
+        // reset to defaults
+        $this->dictionary         = array();
+        $this->dictionaryToCreate = array();
+        $this->numBits            = 2;
+        $this->dataPosition       = 0;
+        $this->dataString         = '';
+        $this->dataVal            = 0;
+        $this->enlargeIn          = 2;
+
         $previousEncoding = mb_internal_encoding();
         mb_internal_encoding(self::INTERNAL_ENCODING);
 
         $uncompressed = mb_convert_encoding($uncompressed, self::INTERNAL_ENCODING, $encoding);
-
-        $this->reset();
 
         $length   = mb_strlen($uncompressed);
         $dictSize = 3;
@@ -128,168 +136,69 @@ class LZW
     {
         $previousEncoding = mb_internal_encoding();
         mb_internal_encoding(self::INTERNAL_ENCODING);
-        
-        $next      = null;
-        $c         = null;
-        $enlargeIn = 4;
-        $numBits   = 3;
-        $dictSize  = 4;
-        $entry     = '';
-        $result    = '';
-        $data      = array(
-            'string'   => $compressed,
-            'val'      => $this->ord(mb_substr($compressed, 0, 1)),
-            'position' => 32768,
-            'index'    => 1
-        );
 
-        $this->dictionary = array(0, 1, 2);
-        $bits     = 0;
-        $maxpower = pow(2, 2);
-        $power    = 1;
-        
-        while ($power != $maxpower) {
-            $resb = $data['val'] & $data['position'];
-            $data['position'] >>= 1;
-            if (0 === $data['position']) {
-                $data['position'] = 32768;
-                $data['val']      = $this->ord(mb_substr($data['string'], $data['index'], 1));
-                $data['index']    = $data['index'] + 1;
-            }
-            $bits |= ($resb > 0 ? 1 : 0) * $power;
-            $power <<= 1;
-        }
+        $this->dictionary   = array(0, 1, 2);
+        $this->numBits      = 3;
+        $this->enlargeIn    = 4;
+        $this->dataString   = $compressed;
+        $this->dataPosition = 32768;
+        $this->dataVal      = $this->ord(mb_substr($compressed, 0, 1));
+        $this->index        = 1;
+
+        $dictSize = 4;
+        $bits     = $this->power(2);
 
         $next = $bits;
         switch ($next) {
             case 0:
-                $bits     = 0;
-                $maxpower = pow(2, 8);
-                $power    = 1;
-
-                while ($power != $maxpower) {
-                    $resb = $data['val'] & $data['position'];
-                    $data['position'] >>= 1;
-                    if (0 === $data['position']) {
-                        $data['position'] = 32768;
-                        $data['val']      = $this->ord(mb_substr($data['string'], $data['index'], 1));
-                        $data['index']    = $data['index'] + 1;
-                    }
-                    $bits |= ($resb > 0 ? 1 : 0) * $power;
-                    $power <<= 1;
-                }
-
-                $c = $this->chr($bits);
+                $bits = $this->power(8);
+                $char = $this->chr($bits);
                 break;
             case 1:
-                $bits     = 0;
-                $maxpower = pow(2, 16);
-                $power    = 1;
-
-                while ($power != $maxpower) {
-                    $resb = $data['val'] & $data['position'];
-                    $data['position'] >>= 1;
-                    if (0 === $data['position']) {
-                        $data['position'] = 32768;
-                        $data['val']      = $this->ord(mb_substr($data['string'], $data['index'], 1));
-                        $data['index']    = $data['index'] + 1;
-                    }
-                    $bits |= ($resb > 0 ? 1 : 0) * $power;
-                    $power <<= 1;
-                }
-
-                $c = $this->chr($bits);
+                $bits = $this->power(16);
+                $char = $this->chr($bits);
                 break;
             case 2:
                 mb_internal_encoding($previousEncoding);
                 return '';
         }
 
-        $this->dictionary[3] = $c;
-        $result              = $c;
-        $w                   = $result;
+        $this->dictionary[3] = $char;
+        $result              = $char;
+        $word                   = $result;
 
         while (true) {
-            if ($data['index'] > mb_strlen($data['string'])) {
+            if ($this->index > mb_strlen($this->dataString)) {
                 mb_internal_encoding($previousEncoding);
                 return '';
             }
 
-            $bits     = 0;
-            $maxpower = pow(2, $numBits);
-            $power    = 1;
-
-            while ($power != $maxpower) {
-                $resb = $data['val'] & $data['position'];
-                $data['position'] >>= 1;
-                if (0 === $data['position']) {
-                    $data['position'] = 32768;
-                    $data['val']      = $this->ord(mb_substr($data['string'], $data['index'], 1));
-                    $data['index']    = $data['index'] + 1;
-                }
-                $bits |= ($resb > 0 ? 1 : 0) * $power;
-                $power <<= 1;
-            }
-
-            $c = $bits;
-            switch ($c) {
+            $char = $this->power($this->numBits);
+            switch ($char) {
                 case 0:
-                    $bits     = 0;
-                    $maxpower = pow(2, 8);
-                    $power    = 1;
-
-                    while ($power != $maxpower) {
-                        $resb = $data['val'] & $data['position'];
-                        $data['position'] >>= 1;
-                        if (0 === $data['position']) {
-                            $data['position'] = 32768;
-                            $data['val']      = $this->ord(mb_substr($data['string'], $data['index'], 1));
-                            $data['index']    = $data['index'] + 1;
-                        }
-                        $bits |= ($resb > 0 ? 1 : 0) * $power;
-                        $power <<= 1;
-                    }
-
+                    $bits                          = $this->power(8);
                     $this->dictionary[$dictSize++] = $this->chr($bits);
-                    $c                             = $dictSize - 1;
-                    $enlargeIn--;
+                    $char                          = $dictSize - 1;
+                    $this->enlargeIn--;
                     break;
                 case 1:
-                    $bits                          = 0;
-                    $maxpower                      = pow(2, 16);
-                    $power                         = 1;
-
-                    while ($power != $maxpower) {
-                        $resb = $data['val'] & $data['position'];
-                        $data['position'] >>= 1;
-                        if (0 === $data['position']) {
-                            $data['position'] = 32768;
-                            $data['val']      = $this->ord(mb_substr($data['string'], $data['index'], 1));
-                            $data['index']    = $data['index'] + 1;
-                        }
-                        $bits |= ($resb > 0 ? 1 : 0) * $power;
-                        $power <<= 1;
-                    }
-
+                    $bits                          = $this->power(16);
                     $this->dictionary[$dictSize++] = $this->chr($bits);
-                    $c                             = $dictSize - 1;
-                    $enlargeIn--;
+                    $char                          = $dictSize - 1;
+                    $this->enlargeIn--;
                     break;
                 case 2:
                     mb_internal_encoding($previousEncoding);
                     return mb_convert_encoding($result, $encoding, self::INTERNAL_ENCODING);
             }
 
-            if ($enlargeIn == 0) {
-                $enlargeIn = pow(2, $numBits);
-                $numBits++;
-            }
+            $this->checkEnlargeIn(false);
 
-            if (array_key_exists($c, $this->dictionary)) {
-                $entry = $this->dictionary[$c];
+            if (array_key_exists($char, $this->dictionary)) {
+                $entry = $this->dictionary[$char];
             } else {
-                if ($c === $dictSize) {
-                    $entry = $w . mb_substr($w, 0, 1);
+                if ($char === $dictSize) {
+                    $entry = $word . mb_substr($word, 0, 1);
                 } else {
                     mb_internal_encoding($previousEncoding);
                     return null;
@@ -299,32 +208,38 @@ class LZW
             $result .= $entry;
 
             // Add w+entry[0] to the dictionary.
-            $this->dictionary[$dictSize++] = $w . mb_substr($entry, 0, 1);
-            $enlargeIn--;
+            $this->dictionary[$dictSize++] = $word . mb_substr($entry, 0, 1);
+            $this->enlargeIn--;
 
-            $w = $entry;
-
-            if ($enlargeIn == 0) {
-                $enlargeIn = pow(2, $numBits);
-                $numBits++;
-            }
+            $word = $entry;
+            $this->checkEnlargeIn(false);
         }
     }
 
     /**
-     * Reset internal properties.
      *
-     * @return void
+     *
+     * @param integer $exp Exponent
+     * @return integer
      */
-    private function reset()
+    private function power($exp)
     {
-        $this->dictionary         = array();
-        $this->dictionaryToCreate = array();
-        $this->numBits            = 2;
-        $this->dataPosition       = 0;
-        $this->dataString         = '';
-        $this->dataVal            = 0;
-        $this->enlargeIn          = 2;
+        $bits     = 0;
+        $maxpower = pow(2, $exp);
+        $power    = 1;
+
+        while ($power != $maxpower) {
+            $resb = $this->dataVal & $this->dataPosition;
+            $this->dataPosition >>= 1;
+            if (0 === $this->dataPosition) {
+                $this->dataPosition = 32768;
+                $this->dataVal      = $this->ord(mb_substr($this->dataString, $this->index++, 1));
+            }
+            $bits |= ($resb > 0 ? 1 : 0) * $power;
+            $power <<= 1;
+        }
+
+        return $bits;
     }
 
     /**
@@ -425,11 +340,14 @@ class LZW
     /**
      * Check enlarge in.
      *
+     * @param boolean $decrease Descrease enlargeIn by one before testing.
      * @return void
      */
-    private function checkEnlargeIn()
+    private function checkEnlargeIn($decrease = true)
     {
-        $this->enlargeIn--;
+        if (true === $decrease) {
+            $this->enlargeIn--;
+        }
         if (0 === $this->enlargeIn) {
             $this->enlargeIn = pow(2, $this->numBits);
             $this->numBits++;

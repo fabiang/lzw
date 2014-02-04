@@ -92,6 +92,19 @@ class LZWTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame($decoded, $this->object->decompress(base64_decode($encoded)));
     }
+    
+    /**
+     * Test decompression.
+     * 
+     * @param mixed $compressed
+     * @covers Fabiang\LZW\LZW::decompress
+     * @dataProvider provideEmptyCompressionStrings
+     * @return void
+     */
+    public function testDeocmpressEmpty($compressed)
+    {
+        $this->assertSame('', $this->object->decompress($compressed));
+    }
 
     /**
      * Data provider for compression strings.
@@ -120,6 +133,10 @@ class LZWTest extends \PHPUnit_Framework_TestCase
             array(
                 'very special unicode unicode: …„“‚‘',
                 'G4UwTgngBAzgDiAxgSwIYBsoFcB2zED2AJiNnoSQFxSBkBIHgEgOASBYBIBgEQAA'
+            ),
+            array(
+                '…',
+                'mQEQAA=='
             )
         );
     }
