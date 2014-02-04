@@ -43,24 +43,45 @@ class LZWTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
+     *
+     * @var LZW
+     */
+    protected $object;
+
+    public function setUp()
+    {
+        $this->object = new LZW;
+    }
+
+    /**
      * Test compression.
      *
-     * @covers Fabiang\LZW\LZW::compress
-     * @covers Fabiang\LZW\LZW::split
-     * @covers Fabiang\LZW\LZW::ord
-     * @covers Fabiang\LZW\LZW::chr
+     * @covers Fabiang\LZW\LZW
      * @dataProvider provideCompressionString
      * @return void
      */
     public function testCompress($decoded, $encoded)
     {
-        $result = LZW::compress($decoded);
+        $result = $this->object->compress($decoded, 'UTF-8');
         $this->assertSame($encoded, base64_encode($result));
     }
-    
+
+    /**
+     * Test that special vars are returned as empty string.
+     *
+     * @param mixed $uncompressed
+     * @covers Fabiang\LZW\LZW::compress
+     * @dataProvider provideEmptyCompressionStrings
+     * @return void
+     */
+    public function testCompressEmpty($uncompressed)
+    {
+        $this->assertSame('', $this->object->compress($uncompressed));
+    }
+
     /**
      * Test decompression.
-     * 
+     *
      * @param type $decoded
      * @param type $encoded
      * @covers Fabiang\LZW\LZW::decompress
@@ -69,7 +90,7 @@ class LZWTest extends \PHPUnit_Framework_TestCase
      */
     public function testDecompress($decoded, $encoded)
     {
-        $this->assertSame($decoded, LZW::decompress(base64_decode($encoded)));
+        $this->assertSame($decoded, $this->object->decompress(base64_decode($encoded)));
     }
 
     /**
@@ -80,23 +101,39 @@ class LZWTest extends \PHPUnit_Framework_TestCase
     public function provideCompressionString()
     {
         return array(
+            /*array(
+                'ABC',
+                'IIIQwkAA'
+            ),
             array(
                 'foobar foobar foobar',
-                'Zm9vYmFyIMSAxILEhMSGxIHEg3I='
+                'GYexCMEMCcAJQjeYrSA='
             ),
             array(
                 'someumlauts ÄÜÖß',
-                'c29tZXVtbGF1dHMgw4TDnMOWw58='
+                'M4ewtgpgrmA2CGUAuwAEARgOwNYPtAAA'
             ),
             array(
                 'somespecialchars !"§$%&/()=?+~#\',.-;:_',
-                'c29tZXNwZWNpYWxjaGFycyAhIsKnJCUmLygpPT8rfiMnLC4tOzpf'
-            ),
-            // @todo make this work
-            /*array(
+                'M4ewtgpsAOEMYEsCGAbOALJAnYACAhAEQDlAJAKQBkA9ABQCUAvAPwDUAfgMQDkANAHQBaANwAuAPpAA'
+            ),*/
+            array(
                 'very special unicode unicode: …„“‚‘',
-                'dmVyeSBzcGVjaWFsIHVuaWNvZGXEjMSOxJDEkjog4oCm4oCe4oCc4oCa4oCY'
-            )*/
+                'G4UwTgngBAzgDiAxgSwIYBsoFcB2zED2AJiNnoSQFxSBkBIHgEgOASBYBIBgEQAA'
+            )
+        );
+    }
+
+    /**
+     * Provide some uncompressed values that should be empty strings.
+     *
+     * @return array
+     */
+    public function provideEmptyCompressionStrings()
+    {
+        return array(
+            array(''),
+            array(null)
         );
     }
 
