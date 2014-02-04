@@ -84,7 +84,7 @@ class LZWTest extends \PHPUnit_Framework_TestCase
      *
      * @param type $decoded
      * @param type $encoded
-     * @covers Fabiang\LZW\LZW::decompress
+     * @covers Fabiang\LZW\LZW
      * @dataProvider provideCompressionString
      * @return void
      */
@@ -101,7 +101,7 @@ class LZWTest extends \PHPUnit_Framework_TestCase
     public function provideCompressionString()
     {
         return array(
-            /*array(
+            array(
                 'ABC',
                 'IIIQwkAA'
             ),
@@ -116,7 +116,7 @@ class LZWTest extends \PHPUnit_Framework_TestCase
             array(
                 'somespecialchars !"§$%&/()=?+~#\',.-;:_',
                 'M4ewtgpsAOEMYEsCGAbOALJAnYACAhAEQDlAJAKQBkA9ABQCUAvAPwDUAfgMQDkANAHQBaANwAuAPpAA'
-            ),*/
+            ),
             array(
                 'very special unicode unicode: …„“‚‘',
                 'G4UwTgngBAzgDiAxgSwIYBsoFcB2zED2AJiNnoSQFxSBkBIHgEgOASBYBIBgEQAA'
