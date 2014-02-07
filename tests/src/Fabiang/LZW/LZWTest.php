@@ -92,10 +92,10 @@ class LZWTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame($decoded, $this->object->decompress(base64_decode($encoded)));
     }
-    
+
     /**
      * Test decompression.
-     * 
+     *
      * @param mixed $compressed
      * @covers Fabiang\LZW\LZW::decompress
      * @dataProvider provideEmptyCompressionStrings
@@ -104,6 +104,38 @@ class LZWTest extends \PHPUnit_Framework_TestCase
     public function testDeocmpressEmpty($compressed)
     {
         $this->assertSame('', $this->object->decompress($compressed));
+    }
+
+    /**
+     * Test compresses and decompresses all printable UTF-16 characters
+     *
+     * @covers Fabiang\LZW\LZW::compress
+     * @covers Fabiang\LZW\LZW::decompress
+     * @large
+     * @return void
+     */
+    public function testCompressAndDecompressAllUTF16()
+    {
+        $this->markTestIncomplete('Does not work yet.');
+        $testString = '';
+
+        for ($i = 32; $i < 127; $i++) {
+            $testString .= $this->chr($i);
+        }
+        for ($i = 128 + 32; $i < 55296; $i++) {
+            $testString .= $this->chr($i);
+        }
+        for ($i = 63744; $i < 65536; $i++) {
+            $testString .= $this->chr($i);
+        }
+
+        $compressed = $this->object->compress($testString);
+        $this->assertSame($testString, $this->object->decompress($compressed));
+    }
+
+    private function chr($u)
+    {
+        return html_entity_decode("&#$u;", ENT_NOQUOTES, 'UTF-8');
     }
 
     /**
@@ -137,6 +169,12 @@ class LZWTest extends \PHPUnit_Framework_TestCase
             array(
                 '…',
                 'mQEQAA=='
+            ),
+            array(
+                ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz|}~',
+                'AQQgRAxAJApAZAcgBQEoBUBqANAWgHQD0ADAIwBMAzACwCsAbAOwAcAnAFwDcAPALwB8AfgACAQQBCAYQAiAUQBiAcQASASQBSAaQA'
+                . 'yAWQByAeQAKARQBKAZQAqAVQBqAdQAaATQBaAbQA6AXQB6APoABgCGAEYAxgAmAKYAZgDmABYAlgBWANYANgC2AHYA9gAOAI4ATg'
+                . 'DOAC4ArgBuAO4AHgCeAF4APgC+AH5AAAA='
             )
         );
     }

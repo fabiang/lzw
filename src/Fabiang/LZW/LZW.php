@@ -188,8 +188,9 @@ class LZW
                     $this->enlargeIn--;
                     break;
                 case 2:
+                    $result = mb_convert_encoding($result, $encoding, self::INTERNAL_ENCODING);
                     mb_internal_encoding($previousEncoding);
-                    return mb_convert_encoding($result, $encoding, self::INTERNAL_ENCODING);
+                    return $result;
             }
 
             $this->checkEnlargeIn(false);
